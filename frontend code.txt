@@ -1,0 +1,227 @@
+import { convertUrlToPdf, getDownloadUrl } from "backend/pdfConverter";
+import { createMyPayment, createOrderTest } from "backend/pay.web"; // Import from the new file
+import wixPayFrontend from "wix-pay-frontend";
+import { extractTextFromPdf } from "backend/extractText";
+
+const Certified_Translation = 17.99;
+const NAATI_Translation = 39.99;
+const Less_than_100_Words = 29.99;
+const UltraExpress_Certified = 27.99;
+const UltraExpress_NAATI = 49.99;
+const UltraExpress_Less_than_100_Words = 39.99;
+let naati, certified, LessWords;
+$w.onReady(() => {
+    $w("#button39").disable();
+    $w("#button40").disable();
+    $w("#uploadButton1").disable();
+    $w('#image6').hide();
+    $w("#uploadButton1").disable()
+    $w("#dropdown4").disable();
+    $w("#dropdown4").disable();
+    $w("#dropdown6").disable();
+    $w("#text316").hide();
+    let dropdown4Options = [
+        { label: "Certified Translation - ($17.99).", value: "option1" },
+        { label: "NAATI Translation - ($39.99).", value: "option2" },
+        { label: "Less than 100 Words - ($29.99).", value: "option3" },
+    ];
+    let dropdown6Options = [
+        { label: "24 to 48 Business hours.", value: "time1" },
+        { label: "1 to 3 Business hours.", value: "time2" },
+    ];
+    $w("#dropdown4").disable();
+    $w("#dropdown5").onChange(() => {
+        if ($w("#dropdown5").selectedIndex === -1) {
+            $w("#dropdown4").disable();
+            $w("#dropdown6").disable();
+            $w("#uploadButton1").disable();
+        } else {
+            $w("#dropdown4").enable();
+            if ($w("#dropdown5").value === "translation2") {
+                let filteredOptions = dropdown4Options.filter(option => option.value !== "option1");
+                let filteredOptions1 = dropdown6Options.filter(option …) {
+                let filteredOptions = dropdown4Options.filter(option => option.value !== "option1");
+                $w("#dropdown4").options = filteredOptions;
+                let filteredOptions1 = dropdown6Options.filter(option => option.value !== "time2");
+                $w("#dropdown6").options = filteredOptions1;
+            } else {
+                $w("#dropdown4").options = dropdown4Options;
+                $w("#dropdown6").options = dropdown6Options;
+            }
+        }
+    });
+    $w("#dropdown6").onChange(() => {
+        if ($w("#dropdown6").selectedIndex === -1) {
+            $w("#uploadButton1").disable();
+        } else {
+            $w("#uploadButton1").enable();
+            $w("#dropdown6").enable();
+            if ($w("#dropdown6").value === "time1") {
+                $w("#text316").show();
+                $w("#text317").expand();
+                $w("#text316").text = "Our translation delivery time is 24 to 48 hours during business hours.";
+                $w("#te…ext317").expand();
+                
+                $w("#text316").text = "You have sele Please upload a File thacted Ultra Express delivery (1 to 3 business hours).";
+                $w("#text317").html = '<b style="font-size:18px;">Important Note:</b><span style="font-size:18px; color:red;">Please upload only PDF files with no more than <b>3 pages</b></span>';
+
+            } else {
+                $w("#text316").hide();
+                $w("#text317").collapse();
+            }
+        }
+    });
+    $w("#dropdown4").onChange(() => {
+
+        if ($w("#dropdown4").selectedIndex === -1) {
+            $w("#dropdown6").disable();
+        } else {
+            let GetingDropDownServiceValue = $w("#dropdown4").value;
+            certified = "UltraExpress Certified Rates = ($27.99).";
+            naati = "UltraExpress NAATI Rates = ($49.99).";
+            LessWords = "UltraExpress Less than 100 Words = ($39.99).";
+
+            if (GetingDropDownServiceValue === "option1") {
+                $w("#tex…16").text = "Since you selected the 1 to 3 hours service, you will be charged the " + naati;
+            } else {
+                $w("#text316").text = "since you selected the 1 to 3 hours service, you will be charged the " + LessWords;
+            }
+            $w("#text317").html = '<span style="font-size:18px;"><b>Note:</b> If postal delivery is required, please contact our operations team via WhatsApp for immediate processing.</span>';
+            $w("#dropdown6").enable();
+        }
+
+    })$w("#button39").onClick(async () => {
+        $w('#image6').show();
+
+        if (selectedFiles.length > 0) {
+            //     selectedFiles.forEach((file, index) => {
+            //         console.log(`File ${index + 1}`);
+            //         console.log("Name:", file.originalName);
+            //         console.log("Size:", file.size);
+            //         console.log("URL:", file.fileUrl);
+            //     });
+
+            try {
+                let check = 0;
+                // cons…              } else {
+                    $w("#text311").text = "Please Upload Pdf Only";
+                }
+            } catch (error) {
+                console.error("Error during file conversion or price calculation:", error);
+                $w("#text308").text = "Error: " + error.message;
+            }
+            $w("#button40").enable();
+        } else {
+            // console.log("No file selected.");
+            $w("#text308").text = "Please select a file to upload.";
+        }
+    });
+    $w("#button40").onClick(() => {
+        let bs;
+        const opt = $w("#dropdown4").options;
+        const opt2 = $w("#dropdown5").options;
+        const opt3 = $w("#dropdown6").options;
+        const TimeValue = $w("#dropdown6").value;
+        const ServicesValue = $w("#dropdown4").value;
+        const selectedService2 = $w("#dropdown5").selectedIndex;
+        const optNumber2 = opt2[selectedService2].label;
+        const selectedService = $w("#dropdown4").selectedIndex;
+        const optNumbe…PayFrontend.startPayment(payment.id)
+                        .then((result) => {
+                            const checkoutId = result.payment.id;
+                        })
+                        .catch((err) => {});
+                } else {
+                    console.error("No payment ID received from createMyPayment.");
+                }
+            })
+            .catch((err) => {
+                console.error("Error creating payment:", err);
+            });
+        // resetForm();
+    });
+    let selectedFiles = [];
+    $w("#uploadButton1").onChange(async () => {
+        const newlySelectedFiles = $w("#uploadButton1").value;
+
+        if (!newlySelectedFiles || newlySelectedFiles.length === 0) return;
+
+        // Filter for PDFs
+        const validPDFs = newlySelectedFiles.filter(file => file.name.toLowerCase().endsWith(".pdf"));
+        if (validPDFs.length !== newlySelectedFiles.length) {
+            $w("#text312").text = "Only PDF files are allowed.";
+            $w("#text312").style.color = "red";
+            return;
+        } else {
+            $w("#text312").text = "";
+        }
+        try {
+            const uploadedResults = await $w("#uploadButton1").uploadFiles();
+
+            uploadedResults.forEach((result, index) => {
+                if (result.fileUrl) {
+                    $w("#repeater1").expand();
+                    selectedFiles.push({
+                        _id: (selectedFiles.length + 1).toString(),
+                        originalFileName: result.originalFileName || "Unnamed File",
+                        fileUrl: result.fileUrl,
+                        size: result.sizeInBytes
+                    });
+                } else {
+                    // console.error("❌ Upload failed for:", result.originalFileName);
+                }
+                // if (selectedFiles.length >= 0) {
+                // console.log("HIZAIFA");
+                $w("#repeater1").onItemReady(($item, itemData, index) => {
+                      // Update the text element. Check that the element exists.
+                      if ($item("#pdfName")) {
+                        $item("#pdfName").text = itemData.originalFileName;
+…                            selectedFiles = selectedFiles.filter(file => file._id !== itemData._id);
+                            // console.log("[DEBUG] Selected files after deletion:", selectedFiles);
+                            // Update the repeater's data.
+                            $w("#repeater1").data = [...selectedFiles];
+               
+            });
+        } else {
+            console.error("[ERROR] deleteBtn element not found in repeater item at index:", index);
+        }
+    });
+    $w("#repeater1").data = [...selectedFiles];
+});
+
+showFiles();
+$w("#button39").enable();
+$w("#uploadButton1").reset();  console.log(selectedFiles);
+} catch (error) {
+    console.error("Upload error:", error);
+    $w("#text312").text = "Upload failed. Try again.";
+    $w("#text312").style.color = "red";
+      }
+});
+
+function showFiles() {
+    // console.log("📂 All selected files:");
+    selectedFiles.forEach((file, index) => {
+        // console.log(`Filee ${index + 1}:`, file._id, file.originalFileName, file.size, file.fileUrl);
+    });
+}
+});
+function countWords(text) {
+    if (!text) return 0;
+    return text.trim().split(/[\s\/.]+/).filter(word => word.length > 0).length;
+}
+
+async function resetForm() {
+    $w("#uploadButton1").reset();
+    $w("#dropdown4").disable(); // Dropdown 4 reset
+    $w("#dropdown6").disable();
+    $w("#dropdown5").selectedIndex = -1; // Dropdown 5 reset
+    $w("#text308").text = "Pages Count"; // Price display reset
+    $w("#text312").text = "";
+    $w("#text311").text = "Price"; // Price display reset
+    $w("#button39").disable(); // Submit button disable
+    $w("#uploadButton1").disable(); // Upload button disable
+    $w("#text316").text = "";
+    $w("#text317").text = "";
+}
+
